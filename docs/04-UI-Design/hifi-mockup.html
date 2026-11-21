@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tip Calculator: Hi-Fi mockup</title>
+<style>
+:root{
+--color-bg:#F4F6F5;--color-surface:#FFFFFF;--color-text:#1C2421;--color-muted:#4E5B56;--color-border:#8A9792;
+--color-primary:#0B6E4F;--color-primary-ink:#FFFFFF;--color-primary-soft:#E3F2EC;--color-result-bg:#0F3D2E;--color-result-text:#FFFFFF;--color-result-muted:#B9D9CC;
+--color-error:#B3261E;--color-error-soft:#FCECEA;--color-focus:#1F5FBF;--color-accent:#F2C14E;
+--font-sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+--fs-xs:.8125rem;--fs-sm:.9375rem;--fs-md:1rem;--fs-lg:1.25rem;--fs-xl:1.75rem;--fs-2xl:2.5rem;
+--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;
+--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--shadow-card:0 2px 10px rgba(0,0,0,.08);
+--control-h:48px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);font-size:var(--fs-md);line-height:1.5}
+.mock-bar{background:#2B2B2B;color:#fff;padding:var(--space-2) var(--space-3);display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center;font-size:var(--fs-xs)}
+.mock-bar strong{margin-right:var(--space-2)}
+.mock-bar button{font:inherit;background:#444;color:#fff;border:1px solid #777;border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;margin:2px 0}
+.mock-bar button[aria-current="true"]{background:#fff;color:#111}
+:focus-visible{outline:3px solid var(--color-focus);outline-offset:2px}
+.mock-bar button:focus-visible{outline-color:#9CC3FF}
+main{max-width:960px;margin:0 auto;padding:var(--space-4)}
+.app-header h1{font-size:var(--fs-xl);margin:0}
+.app-header p{margin:var(--space-1) 0 var(--space-4);color:var(--color-muted)}
+.layout{display:grid;gap:var(--space-4)}
+.layout>*{min-width:0}
+@media(min-width:760px){.layout{grid-template-columns:1fr 1fr;align-items:start}}
+.card{background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:var(--space-5)}
+.field{margin-bottom:var(--space-5)}
+.field label,.field .legend{display:block;font-weight:600;margin-bottom:var(--space-2)}
+.input-wrap{position:relative}
+.input-wrap .affix{position:absolute;top:50%;transform:translateY(-50%);color:var(--color-muted);font-weight:600}
+.affix.pre{left:14px}.affix.post{right:14px}
+input.text{width:100%;min-width:0;height:var(--control-h);border:2px solid var(--color-border);border-radius:var(--radius-md);font:inherit;font-size:var(--fs-lg);padding:0 var(--space-4) 0 32px;background:#fff;color:var(--color-text)}
+input.text.nopre{padding-left:var(--space-4)}
+input.text[aria-invalid="true"]{border-color:var(--color-error);background:var(--color-error-soft)}
+fieldset{border:0;padding:0;margin:0 0 var(--space-5);min-width:0}
+legend{font-weight:600;margin-bottom:var(--space-2);padding:0}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-2);margin-bottom:var(--space-3)}
+.preset{height:var(--control-h);min-width:0;border:2px solid var(--color-primary);background:#fff;color:var(--color-primary);border-radius:var(--radius-md);font:inherit;font-size:var(--fs-lg);font-weight:700;cursor:pointer}
+.preset[aria-pressed="true"]{background:var(--color-primary);color:var(--color-primary-ink)}
+.field-error{display:flex;gap:6px;color:var(--color-error);font-size:var(--fs-sm);margin-top:var(--space-2)}
+.switch-row{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);padding-top:var(--space-4);border-top:1px solid #DDE3E0}
+.switch-row small{display:block;color:var(--color-muted);font-weight:400}
+.switch{position:relative;width:56px;height:32px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:100%;height:100%}
+.switch .track{position:absolute;inset:0;border-radius:16px;background:#6F7C77;transition:background .15s}
+.switch .track::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked+.track{background:var(--color-primary)}
+.switch input:checked+.track::after{transform:translateX(24px)}
+.switch input:focus-visible+.track{outline:3px solid var(--color-focus);outline-offset:2px}
+.results{background:var(--color-result-bg);color:var(--color-result-text);border-radius:var(--radius-lg);padding:var(--space-5)}
+.results h2{font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:.06em;color:var(--color-result-muted);margin:0 0 var(--space-3)}
+.per-person{font-size:var(--fs-2xl);font-weight:800;line-height:1.1;margin:0;overflow-wrap:anywhere}
+.per-label{color:var(--color-result-muted);font-size:var(--fs-sm)}
+.res-list{margin:var(--space-4) 0 0;padding:0;list-style:none}
+.res-list li{display:flex;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) 0;border-top:1px solid rgba(255,255,255,.18);font-variant-numeric:tabular-nums}
+.res-list li span:last-child{text-align:right;white-space:nowrap}
+.res-list li.extra{color:var(--color-accent);font-weight:700}
+.hint{font-size:var(--fs-sm);color:var(--color-result-muted);margin-top:var(--space-3)}
+.notes h2{font-size:var(--fs-lg);margin-top:var(--space-5)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--space-3)}
+.sw{border:1px solid #DDE3E0;border-radius:var(--radius-md);overflow:hidden;font-size:var(--fs-xs);background:#fff}
+.sw div{height:48px}
+.sw p{margin:0;padding:var(--space-2)}
+table{border-collapse:collapse;width:100%;font-size:var(--fs-sm);background:#fff}
+th,td{border:1px solid #DDE3E0;padding:6px 8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+code{font-size:.85em;background:#EEF1F0;padding:1px 4px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(max-width:359px){main{padding:var(--space-3)}.card,.results{padding:var(--space-4)}.per-person{font-size:var(--fs-xl)}.app-header h1{font-size:var(--fs-lg)}.preset{font-size:var(--fs-md)}}
+</style>
+</head>
+<body>
+<nav class="mock-bar" aria-label="Mockup screens"><strong>MOCKUP</strong><span id="mockNav"></span></nav>
+<main id="view"></main>
+<script>
+var STATES=[
+{id:`empty`,label:`1. Empty (first load)`},
+{id:`filled`,label:`2. Filled: $85.40, 20%, 3`},
+{id:`custom`,label:`3. Custom tip 12.5%`},
+{id:`rounded`,label:`4. Round-up on`},
+{id:`error`,label:`5. Errors`},
+{id:`notes`,label:`Design notes`}
+];
+var DATA={
+empty:{bill:``,preset:null,custom:``,people:``,round:false,res:null},
+filled:{bill:`85.40`,preset:20,custom:``,people:`3`,round:false,res:{tip:`$17.08`,total:`$102.48`,pp:`$34.16`}},
+custom:{bill:`100.00`,preset:null,custom:`12.5`,people:`4`,round:false,res:{tip:`$12.50`,total:`$112.50`,pp:`$28.13`}},
+rounded:{bill:`85.40`,preset:20,custom:``,people:`3`,round:true,res:{tip:`$17.08`,total:`$102.48`,pp:`$34.50`,orig:`$34.16`,collected:`$103.50`,over:`$1.02`}},
+error:{bill:`12.345`,preset:null,custom:`101`,people:`0`,round:false,res:null,errors:{bill:`Enter an amount from $0.01 to $99,999.99 (up to 2 decimals)`,tip:`Enter a tip from 0 to 100% (whole number or one decimal)`,people:`Enter a whole number from 1 to 50`}}
+};
+var current=`empty`;
+function errHtml(id,msg){
+if(!msg){return ``;}
+return `<p class="field-error" id="${id}"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" style="flex:none;margin-top:3px"><circle cx="8" cy="8" r="7" fill="currentColor"/><rect x="7" y="4" width="2" height="5" fill="#fff"/><rect x="7" y="10.5" width="2" height="2" fill="#fff"/></svg><span>${msg}</span></p>`;
+}
+function app(d){
+var e=d.errors||{};
+var presets=[10,15,20].map(function(p){return `<button type="button" class="preset" data-p="${p}" aria-pressed="${d.preset===p}">${p}%</button>`;}).join(``);
+var r=d.res;
+var dash=`—`;
+var lines=``;
+if(r&&d.round){
+lines=`<li><span>Tip</span><span>${r.tip}</span></li><li><span>Original total</span><span>${r.total}</span></li><li><span>Rounded collected total</span><span>${r.collected}</span></li><li class="extra"><span>Overpayment (extra tip)</span><span>${r.over}</span></li>`;
+}else{
+lines=`<li><span>Tip</span><span>${r?r.tip:dash}</span></li><li><span>Total</span><span>${r?r.total:dash}</span></li>`;
+}
+var hint=r?(d.round?`Exact share ${r.orig}, rounded up to the next $0.50.`:`Equal split between ${d.people} people.`):`Enter the bill, a tip and the number of people.`;
+return `<header class="app-header"><h1>Tip Calculator</h1><p>Split the bill and tip equally. Amounts in USD.</p></header>
+<div class="layout">
+<section class="card" aria-label="Inputs">
+<div class="field" data-component="BillInput"><label for="bill">Bill amount ($)</label><div class="input-wrap"><span class="affix pre" aria-hidden="true">$</span><input class="text" id="bill" inputmode="decimal" placeholder="0.00" value="${d.bill}" aria-invalid="${!!e.bill}" ${e.bill?`aria-describedby="bill-err"`:``}></div>${errHtml(`bill-err`,e.bill)}</div>
+<fieldset data-component="TipSelector"><legend>Tip</legend><div class="presets">${presets}</div><label for="tip" style="font-weight:600;display:block;margin-bottom:8px">Custom tip (%)</label><div class="input-wrap"><input class="text nopre" id="tip" inputmode="decimal" placeholder="e.g. 12.5" value="${d.custom}" aria-invalid="${!!e.tip}" ${e.tip?`aria-describedby="tip-err"`:``}><span class="affix post" aria-hidden="true">%</span></div>${errHtml(`tip-err`,e.tip)}</fieldset>
+<div class="field" data-component="PeopleInput"><label for="people">Number of people</label><input class="text nopre" id="people" inputmode="numeric" placeholder="1–50" value="${d.people}" aria-invalid="${!!e.people}" ${e.people?`aria-describedby="people-err"`:``}>${errHtml(`people-err`,e.people)}</div>
+<div class="switch-row" data-component="RoundUpToggle"><label for="round" style="font-weight:600">Round each share up<small>To the nearest $0.50</small></label><span class="switch"><input type="checkbox" role="switch" id="round" ${d.round?`checked`:``}><span class="track" aria-hidden="true"></span></span></div>
+</section>
+<section class="results" aria-live="polite" data-component="Results"><h2>Each person pays</h2><p class="per-person">${r?r.pp:dash}</p><p class="per-label">Per person</p><ul class="res-list">${lines}</ul><p class="hint">${hint}</p></section>
+</div>`;
+}
+function sw(hex,name,use){return `<div class="sw"><div style="background:${hex}"></div><p><strong>${name}</strong><br><code>${hex}</code><br>${use}</p></div>`;}
+function notes(){
+return `<div class="notes"><h1>Design notes</h1><p>Mobile-first single page. One column below 760 px, inputs and results side by side above it. Tokens are defined on <code>:root</code> and should be copied into <code>src/styles.css</code>.</p>
+<h2>Colour palette</h2><div class="swatches">
+${sw(`#0B6E4F`,`--color-primary`,`Presets, switch on, focus accents. 6.1:1 on white.`)}
+${sw(`#0F3D2E`,`--color-result-bg`,`Results panel. White text 12.4:1.`)}
+${sw(`#B9D9CC`,`--color-result-muted`,`Labels on results panel. 8.9:1.`)}
+${sw(`#F2C14E`,`--color-accent`,`Overpayment line on result panel. 8.3:1.`)}
+${sw(`#1C2421`,`--color-text`,`Body text. 15.6:1.`)}
+${sw(`#4E5B56`,`--color-muted`,`Hints, affixes. 6.9:1.`)}
+${sw(`#8A9792`,`--color-border`,`Input borders (3:1 non-text).`)}
+${sw(`#B3261E`,`--color-error`,`Error text and border. 6.5:1.`)}
+${sw(`#FCECEA`,`--color-error-soft`,`Invalid input fill.`)}
+${sw(`#1F5FBF`,`--color-focus`,`3 px focus ring.`)}
+${sw(`#F4F6F5`,`--color-bg`,`Page background.`)}
+${sw(`#FFFFFF`,`--color-surface`,`Cards, inputs.`)}
+</div>
+<h2>Typography</h2><table><tr><th>Token</th><th>Size</th><th>Use</th></tr><tr><td><code>--font-sans</code></td><td>system-ui stack</td><td>All text; no web fonts</td></tr><tr><td><code>--fs-2xl</code></td><td>2.5rem / 800</td><td>Per-person amount (drops to <code>--fs-xl</code> below 360 px)</td></tr><tr><td><code>--fs-xl</code></td><td>1.75rem / 700</td><td>App title (drops to <code>--fs-lg</code> below 360 px)</td></tr><tr><td><code>--fs-lg</code></td><td>1.25rem</td><td>Input values, preset labels</td></tr><tr><td><code>--fs-md</code></td><td>1rem</td><td>Body, labels (600)</td></tr><tr><td><code>--fs-sm</code> / <code>--fs-xs</code></td><td>.9375 / .8125rem</td><td>Errors, hints / captions</td></tr></table>
+<p>Money uses <code>font-variant-numeric: tabular-nums</code>.</p>
+<h2>Spacing and shape</h2><p><code>--space-1..6</code> = 4, 8, 12, 16, 24, 32 px. <code>--radius-sm/md/lg</code> = 6, 10, 16 px. <code>--control-h</code> = 48 px (touch target). <code>--shadow-card</code> on the input card.</p>
+<h2>Components (names match the SDD)</h2><table><tr><th>Component</th><th>Style and states</th></tr>
+<tr><td><code>BillInput</code></td><td>Label "Bill amount ($)", $ prefix, <code>inputMode="decimal"</code>. Invalid: red border, pink fill, <code>aria-invalid</code>.</td></tr>
+<tr><td><code>TipSelector</code></td><td>Three outlined preset buttons in a grid; selected = filled primary, <code>aria-pressed="true"</code>. Custom field with % suffix; typing clears the preset.</td></tr>
+<tr><td><code>PeopleInput</code></td><td>Numeric input, <code>inputMode="numeric"</code>.</td></tr>
+<tr><td><code>RoundUpToggle</code></td><td>Checkbox with <code>role="switch"</code> styled as a 56×32 track; off by default.</td></tr>
+<tr><td><code>Results</code></td><td>Dark panel, <code>aria-live="polite"</code>. Large per-person amount, then Tip and Total. Round-up on: Original total, Rounded collected total, Overpayment in accent. Invalid: every value '—'.</td></tr>
+<tr><td><code>FieldError</code></td><td>Error icon + text under the field; <code>id</code> linked by <code>aria-describedby</code>. Shown only after the field is touched.</td></tr></table>
+<h2>Focus and accessibility</h2><p>All controls show a 3 px <code>--color-focus</code> outline with 2 px offset on keyboard focus. Tab order: bill, 10%, 15%, 20%, custom tip, people, round-up switch.</p>
+<h2>Responsive check (NFR-04)</h2><p>Layout verified at 320, 360, 760 and 1280 px with no horizontal scroll. At 320 px the content area is 288 px; below 360 px a compact rule applies: page padding 12 px, card and results padding 16 px, per-person amount 1.75rem (so $99,999.99 fits on one line), preset labels 1rem. The three presets stay in one row (about 77 px each, still 48 px tall). Result rows keep amounts right-aligned and unwrapped while labels wrap. The mockup bar wraps onto several lines.</p></div>`;
+}
+function render(){
+document.getElementById(`mockNav`).innerHTML=STATES.map(function(s){return `<button type="button" data-s="${s.id}" aria-current="${s.id===current}">${s.label}</button> `;}).join(``);
+document.getElementById(`view`).innerHTML=current===`notes`?notes():app(DATA[current]);
+}
+document.addEventListener(`click`,function(ev){
+var b=ev.target.closest(`[data-s]`);
+if(b){current=b.getAttribute(`data-s`);render();return;}
+var p=ev.target.closest(`.preset`);
+if(p){var all=document.querySelectorAll(`.preset`);for(var i=0;i<all.length;i++){all[i].setAttribute(`aria-pressed`,`false`);}p.setAttribute(`aria-pressed`,`true`);}
+});
+document.addEventListener(`change`,function(ev){
+if(ev.target.id===`round`&&(current===`filled`||current===`rounded`)){current=ev.target.checked?`rounded`:`filled`;render();document.getElementById(`round`).focus();}
+});
+render();
+</script>
+</body>
+</html>
